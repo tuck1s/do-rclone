@@ -1,0 +1,13 @@
+/@Recycle/**
+.DS_Store
+._.DS_Store
+.metadata
+.localized
+.com.apple.timemachine.supported
+._*
+Thumbs.db
+.bzEmpty
+.picasa.ini
+$RECYCLE.BIN/**
+/.hccache/**
+Desktop.ini

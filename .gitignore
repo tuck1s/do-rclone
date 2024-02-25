@@ -1,0 +1,4 @@
+rclone.log
+rclone.log.*
+rclone.conf
+.logrotate.status

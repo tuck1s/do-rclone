@@ -1,0 +1,16 @@
+#
+# logrotate configuration file for personal log files
+# Written by Richard Dawe <rich@phekda.org>
+# Last updated 2014-11-08
+#
+
+#errors steve@thetucks.com
+nomail
+compress
+size 4M
+rotate 10
+
+/home/steve/do-rclone/rclone.log {
+  nomail
+  missingok
+}
