@@ -7,19 +7,15 @@ logfile=$logdir/rclone.log
 #
 for d in Kathy Hannah Olly Steve Qmultimedia
 do
-  echo ====== Starting \"$d\" >>$logfile
+  echo ====== CLEANUP of recycle areas \"$d\" >>$logfile
   # need to specify a modify time window of 2 seconds to prevent needless "modification time" updates
   #   use separate buckets for each share, for quicker browsing on BackBlaze UI
   #   set the config file directly, for compatibility with crontab
   #   now we have more virtual memory set up, use more checkers and transfers (was: 2, 2)
   #   use terse one-line stats logging
   #   try to optimise costs with --fast-list, ignore-existing and cache
-  rclone sync /mnt/$d/ backblaze:/TuckStore-$d \
-    --fast-list \
-    --ignore-existing \
-    --exclude-from "$logdir/rclone_exclude" \
-    --cache-dir "$logdir/rclone-cache-$d" \
-    --cache-tmp-upload-path "$logdir/rclone-cache-tmp-$d" \
+  rclone delete backblaze:/TuckStore-$d \
+    --include "#recycle/**" \
     --config="$logdir/rclone.conf" \
     --verbose --checkers=8 --transfers=4 --modify-window=2s \
     --buffer-size 64M --log-file=$logfile --stats-one-line
