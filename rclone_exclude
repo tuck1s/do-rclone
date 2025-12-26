@@ -1,5 +1,5 @@
 /@Recycle/**
-#recycle/**
+/\#recycle/**
 .DS_Store
 ._.DS_Store
 .metadata

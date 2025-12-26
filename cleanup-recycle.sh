@@ -2,8 +2,8 @@
 logdir=$HOME/do-rclone
 logfile=$logdir/rclone.log
 # Control whether this actually deletes, or just does a dry run
-DRY_RUN_FLAG="--dry-run"
-# DRY_RUN_FLAG=""
+# DRY_RUN_FLAG="--dry-run"
+DRY_RUN_FLAG=""
 
 # force the log to rotate before starting
 /usr/sbin/logrotate $logdir/.logrotaterc --state $logdir/.logrotate.status -f
@@ -19,10 +19,18 @@ do
   #   now we have more virtual memory set up, use more checkers and transfers (was: 2, 2)./x
   #   use terse one-line stats logging
   rclone delete backblaze:/TuckStore-$d \
-    --include-from "$logdir/cleanup_list" \
+    --include "/@Recycle/**" \
+    --include "/#recycle/**" \
+    --include "/$RECYCLE.BIN/**" \
     --config="$logdir/rclone.conf" \
     --verbose --checkers=8 --transfers=4 --modify-window=2s \
     --buffer-size 64M --log-file=$logfile --stats-one-line $DRY_RUN_FLAG
+    
+  echo "====== CLEANUP $DRY_RUN_FLAG of unfinished large files \"$d\" ======" >>$logfile
+  # unfinished multipart upload cleanup
+  rclone cleanup backblaze:/TuckStore-$d \
+    --config="$logdir/rclone.conf" \
+    --verbose --log-file=$logfile $DRY_RUN_FLAG    
 done
 echo ====== Done >>$logfile
 swaks --server smtp.ntlworld.com --to steve@thetucks.com --ehlo there --from steven.tuck@ntlworld.com --header "Subject: rclone backup complete" \
