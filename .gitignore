@@ -1,5 +1,6 @@
 rclone.log
 rclone.log.*
 rclone.conf
+.swaks_auth
 .logrotate.status
 nohup.out
