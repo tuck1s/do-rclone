@@ -1,0 +1,8 @@
+# Example mounts - add these. Note passwords redacted
+
+# Synology NAS Mounts for Rclone Backup Pipeline
+//tuckstore.local/Steve /mnt/Steve cifs username=steve,password=_____,uid=steve,gid=steve,_netdev,x-systemd.automount 0 0
+//tuckstore.local/Kathy /mnt/Kathy cifs username=steve,password=_____,uid=steve,gid=steve,_netdev,x-systemd.automount 0 0
+//tuckstore.local/Olly /mnt/Olly cifs username=steve,password=_____,uid=steve,gid=steve,_netdev,x-systemd.automount 0 0
+//tuckstore.local/Hannah /mnt/Hannah cifs username=steve,password=_____,uid=steve,gid=steve,_netdev,x-systemd.automount 0 0
+//tuckstore.local/Qmultimedia /mnt/Qmultimedia cifs username=steve,password=_____,uid=steve,gid=steve,_netdev,x-systemd.automount 0 0
