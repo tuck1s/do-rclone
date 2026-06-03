@@ -20,4 +20,8 @@ sudo systemctl restart remote-fs.target
 systemctl status NetworkManager-wait-online.service
 ```
 
-Activate crontab
+Activate crontab with
+
+```
+crontab cronfile
+```
