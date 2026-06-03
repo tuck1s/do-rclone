@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-logdir=$HOME/do-rclone
+logdir=$(dirname "$(readlink -f "$0")")
 logfile=$logdir/rclone.log
 # force the log to rotate before starting
 /usr/sbin/logrotate $logdir/.logrotaterc --state $logdir/.logrotate.status -f
