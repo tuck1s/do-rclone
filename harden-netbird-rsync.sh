@@ -164,8 +164,18 @@ ufw_has_rule() {
   ufw status | grep -Fq -- "$rule"
 }
 
+clear_ufw_rsync_rules() {
+  local nums=()
+  # Remove all existing 873/tcp rules so role switches stay consistent.
+  mapfile -t nums < <(ufw status numbered | sed -n 's/^\[ *\([0-9][0-9]*\)\].*873\/tcp.*/\1/p' | sort -rn)
+  for n in "${nums[@]}"; do
+    ufw --force delete "$n" >/dev/null
+  done
+}
+
 configure_ufw_server() {
   log "Applying UFW rules for server role."
+  clear_ufw_rsync_rules
   # Allow rsync only from peer over wt0.
   if ! ufw_has_rule "873/tcp on wt0 ALLOW IN ${PEER_WT0_IP}"; then
     ufw allow in on wt0 from "${PEER_WT0_IP}" to any port 873 proto tcp comment 'rsync over netbird'
@@ -183,6 +193,7 @@ configure_ufw_server() {
 
 configure_ufw_client() {
   log "Applying UFW rules for client role."
+  clear_ufw_rsync_rules
   if ! ufw_has_rule "873/tcp DENY IN Anywhere"; then
     ufw deny in to any port 873 proto tcp comment 'client should not accept rsync daemon'
   fi
