@@ -113,19 +113,31 @@ backup_file() {
 
 ensure_rsync_bind_wt0() {
   local conf="/etc/rsyncd.conf"
+  local tmp=""
   backup_file "${conf}"
   touch "${conf}"
 
-  # Replace existing address line or add one.
-  if grep -Eq '^\s*address\s*=' "${conf}"; then
-    sed -i -E "s|^\s*address\s*=.*|address = ${WT0_IP}|g" "${conf}"
-  else
-    {
-      echo
-      echo "# Bound by harden-netbird-rsync.sh"
-      echo "address = ${WT0_IP}"
-    } >> "${conf}"
-  fi
+  # Keep a single global address directive before the first module block.
+  sed -i -E '/^# Bound by harden-netbird-rsync\.sh$/d' "${conf}"
+  sed -i -E '/^\s*address\s*=.*/d' "${conf}"
+  tmp="$(mktemp)"
+  awk -v ip="${WT0_IP}" '
+    BEGIN { inserted = 0 }
+    /^[[:space:]]*\[/ && inserted == 0 {
+      print "# Bound by harden-netbird-rsync.sh"
+      print "address = " ip
+      inserted = 1
+    }
+    { print }
+    END {
+      if (inserted == 0) {
+        print ""
+        print "# Bound by harden-netbird-rsync.sh"
+        print "address = " ip
+      }
+    }
+  ' "${conf}" > "${tmp}"
+  mv "${tmp}" "${conf}"
 
   # Basic safety defaults if absent.
   grep -Eq '^\s*use chroot\s*=' "${conf}" || echo "use chroot = yes" >> "${conf}"
@@ -147,20 +159,33 @@ ufw_active() {
   ufw status | head -n1 | grep -qi "Status: active"
 }
 
+ufw_has_rule() {
+  local rule="$1"
+  ufw status | grep -Fq -- "$rule"
+}
+
 configure_ufw_server() {
   log "Applying UFW rules for server role."
   # Allow rsync only from peer over wt0.
-  ufw allow in on wt0 from "${PEER_WT0_IP}" to any port 873 proto tcp comment 'rsync over netbird'
+  if ! ufw_has_rule "873/tcp on wt0 ALLOW IN ${PEER_WT0_IP}"; then
+    ufw allow in on wt0 from "${PEER_WT0_IP}" to any port 873 proto tcp comment 'rsync over netbird'
+  fi
   # Explicitly block LAN/Wi-Fi rsync exposure.
-  ufw deny in on eth0 to any port 873 proto tcp comment 'block rsync on LAN' || true
+  if ! ufw_has_rule "873/tcp on eth0 DENY IN Anywhere"; then
+    ufw deny in on eth0 to any port 873 proto tcp comment 'block rsync on LAN' || true
+  fi
   if ip link show wlan0 >/dev/null 2>&1; then
-    ufw deny in on wlan0 to any port 873 proto tcp comment 'block rsync on Wi-Fi' || true
+    if ! ufw_has_rule "873/tcp on wlan0 DENY IN Anywhere"; then
+      ufw deny in on wlan0 to any port 873 proto tcp comment 'block rsync on Wi-Fi' || true
+    fi
   fi
 }
 
 configure_ufw_client() {
   log "Applying UFW rules for client role."
-  ufw deny in to any port 873 proto tcp comment 'client should not accept rsync daemon'
+  if ! ufw_has_rule "873/tcp DENY IN Anywhere"; then
+    ufw deny in to any port 873 proto tcp comment 'client should not accept rsync daemon'
+  fi
 }
 
 manual_firewall_instructions() {
