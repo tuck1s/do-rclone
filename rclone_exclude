@@ -2,6 +2,7 @@
 /\#recycle/**
 .DS_Store
 ._.DS_Store
+Icon?
 .metadata
 .localized
 .com.apple.timemachine.supported
