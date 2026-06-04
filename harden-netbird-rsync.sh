@@ -147,6 +147,26 @@ ensure_rsync_bind_wt0() {
   systemctl restart rsync
 }
 
+ensure_rsync_wait_for_wt0() {
+  local dropin_dir="/etc/systemd/system/rsync.service.d"
+  local dropin_file="${dropin_dir}/wt0-wait.conf"
+  mkdir -p "${dropin_dir}"
+
+  cat > "${dropin_file}" <<'EOF'
+[Unit]
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStartPre=/bin/sh -c 'for i in $(seq 1 30); do ip -4 -o addr show dev wt0 | grep -q "inet " && exit 0; sleep 1; done; echo "wt0 IPv4 not ready" >&2; exit 1'
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=0
+EOF
+
+  systemctl daemon-reload
+}
+
 disable_rsync_daemon() {
   systemctl disable --now rsync >/dev/null 2>&1 || true
 }
@@ -232,6 +252,7 @@ main() {
 
   if [[ "${ROLE}" == "server" ]]; then
     log "Configuring server role."
+    ensure_rsync_wait_for_wt0
     ensure_rsync_bind_wt0
     if ufw_exists; then
       if ufw_active; then
