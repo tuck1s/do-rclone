@@ -38,7 +38,7 @@ echo "====== Starting \"$d\" to Pi 5 Vault (via Native Rsync) ======" >>$logfile
   #   --delete: mimics rclone sync by removing files at destination that were deleted at source
 rsync -avz --delete \
     --exclude-from="$logdir/rclone_exclude" \
-    --out-format="%t [RSYNC] : %f (%b bytes, xfer %c bytes)" \
+  --out-format="%t [RSYNC] : %f (%b bytes)" \
     /mnt/$d/ rsync://pi5.netbird.cloud/offsite_vault/$d/ >>$logfile 2>&1
 
 done
