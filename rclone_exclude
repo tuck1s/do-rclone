@@ -11,5 +11,7 @@ Thumbs.db
 .bzEmpty
 .picasa.ini
 $RECYCLE.BIN/**
+**/$RECYCLE.BIN/
+**/$RECYCLE.BIN/**
 /.hccache/**
 Desktop.ini
