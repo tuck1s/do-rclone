@@ -2,4 +2,6 @@ HOME=/home/steve
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # m h  dom mon dow   command
-1 0 * * SAT /home/steve/do-rclone/do-rclone.sh
+1 19 * * SUN /home/steve/do-rclone/do-rclone.sh
+
+0 19 * * * /home/steve/do-rclone/chk-remote-liveness.sh

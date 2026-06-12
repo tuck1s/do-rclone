@@ -1,4 +1,4 @@
-rclone.log
+*.log
 rclone.log.*
 rclone.conf
 .swaks_auth
